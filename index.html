@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local LLM Hosting 01 — Why Host Locally, The Landscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-card: #0d1117;
+            --bg-code: #161b22;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent: #76B900;
+            --accent-dim: #76B90044;
+            --accent-glow: #76B90033;
+            --border: #21262d;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-body: 'Inter', sans-serif;
+            --max-width: 900px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .series-label {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 .accent {
+            color: var(--accent);
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Tag Pills ── */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+            white-space: nowrap;
+        }
+
+        /* ── Pipeline Flow Bar ── */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            max-width: var(--max-width);
+        }
+
+        .pipeline-step {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.3rem 0.7rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .pipeline-arrow {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        /* ── Slides ── */
+        .slide {
+            min-height: 100vh;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-number {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--accent-dim);
+            position: absolute;
+            top: 2rem;
+            right: 1.5rem;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .slide h2 {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            line-height: 1.25;
+        }
+
+        .slide h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slide p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .slide p strong {
+            color: var(--text-primary);
+        }
+
+        .slide ul, .slide ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .slide li {
+            margin-bottom: 0.4rem;
+        }
+
+        .slide li strong {
+            color: var(--text-primary);
+        }
+
+        /* ── Code Blocks ── */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1.25rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(118, 185, 0, 0.08);
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+        }
+
+        /* Syntax highlighting (manual) */
+        .kw { color: #ff7b72; }
+        .fn { color: #d2a8ff; }
+        .str { color: #a5d6ff; }
+        .cm { color: #8b949e; font-style: italic; }
+        .num { color: #79c0ff; }
+        .type { color: #ffa657; }
+        .dir { color: #ff7b72; }
+        .mac { color: #ffa657; }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.25rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-code);
+            color: var(--accent);
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-display);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(13, 17, 23, 0.5);
+        }
+
+        /* ── Diagrams ── */
+        .diagram-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-box {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .diagram-box.accent {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(118, 185, 0, 0.08);
+        }
+
+        .diagram-box.dim {
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+
+        .diagram-arrow {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Vertical flow diagrams */
+        .diagram-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-vertical .diagram-arrow {
+            font-size: 1.1rem;
+        }
+
+        /* Nested hierarchy diagram */
+        .hierarchy {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .hierarchy-level {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hierarchy-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .hierarchy-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .hierarchy-item {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .hierarchy-item.accent {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(118, 185, 0, 0.08);
+        }
+
+        /* Grid diagram */
+        .diagram-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .diagram-grid.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .diagram-grid.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .diagram-panel {
+            padding: 1rem;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .diagram-panel.accent-border {
+            border-left: 3px solid var(--accent);
+        }
+
+        .diagram-panel h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .diagram-panel p, .diagram-panel ul {
+            font-size: 0.85rem;
+        }
+
+        /* ── Callout Boxes ── */
+        .callout {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+        }
+
+        .callout .callout-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.3rem;
+        }
+
+        /* ── Tier Visual ── */
+        .tier-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .tier-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tier-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .tier-fill {
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            transition: width 0.6s ease;
+        }
+
+        .tier-cost {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            min-width: 70px;
+        }
+
+        /* ── Contents list ── */
+        .contents-list {
+            list-style: none;
+            padding-left: 0;
+            counter-reset: contents;
+        }
+
+        .contents-list li {
+            counter-increment: contents;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .contents-list li:last-child {
+            border-bottom: none;
+        }
+
+        .contents-list li::before {
+            content: counter(contents, decimal-leading-zero);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            min-width: 2rem;
+        }
+
+        .contents-list a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contents-list a:hover {
+            color: var(--accent);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .slide {
+                padding: 3rem 1rem;
+                min-height: auto;
+            }
+
+            .slide-number {
+                font-size: 3rem;
+                top: 1.5rem;
+                right: 1rem;
+            }
+
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+
+            .diagram-grid.cols-2,
+            .diagram-grid.cols-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline {
+                gap: 0.15rem;
+            }
+
+            .pipeline-step {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            table {
+                font-size: 0.78rem;
+            }
+
+            .tier-label {
+                min-width: 60px;
+                font-size: 0.65rem;
+            }
+
+            .tier-fill {
+                font-size: 0.6rem;
+                height: 26px;
+            }
+        }
+
+        /* ── Interactive controls (added for Local LLM series) ── */
+        .control-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+        }
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .control-row label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 180px;
+        }
+        .control-row input[type="range"] {
+            flex: 1;
+            min-width: 160px;
+            accent-color: var(--accent);
+        }
+        .control-row input[type="number"],
+        .control-row select {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        .control-row .val {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent);
+            min-width: 80px;
+            text-align: right;
+        }
+        .btn {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.9rem;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .btn:hover { background: rgba(118, 185, 0, 0.2); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn.secondary {
+            background: var(--bg-code);
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+        .result-box {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-top: 0.75rem;
+        }
+        .result-box .line-label { color: var(--text-secondary); }
+        .result-box .line-val   { color: var(--accent); font-weight: 600; }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .metric {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            text-align: center;
+        }
+        .metric .metric-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .metric .metric-value {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* Canvas / SVG containers */
+        .canvas-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.25rem 0;
+            overflow-x: auto;
+        }
+        .canvas-wrap canvas,
+        .canvas-wrap svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        /* Small inline badge */
+        .badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: middle;
+            margin-left: 0.3rem;
+        }
+        .badge.ok    { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+        .badge.warn  { border-color: #ffa657; color: #ffa657; background: rgba(255,166,87,0.08); }
+        .badge.bad   { border-color: #ff7b72; color: #ff7b72; background: rgba(255,123,114,0.08); }
+
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ HERO ════════════════════════════════════════════ -->
+<header class="hero">
+    <div class="series-label">Local LLM Hosting Series — Presentation 01</div>
+    <h1>Why Host LLMs <span class="accent">Locally</span> — The Landscape</h1>
+    <p class="subtitle">Drivers, tradeoffs, and a map of the local-inference ecosystem: Ollama, vLLM, llama.cpp, TGI, SGLang, TensorRT-LLM, LMDeploy, MLC, and the hardware they run on.</p>
+
+    <div class="tags">
+        <span class="tag">Local Inference</span>
+        <span class="tag">vLLM</span>
+        <span class="tag">Ollama</span>
+        <span class="tag">llama.cpp</span>
+        <span class="tag">NVIDIA</span>
+        <span class="tag">DGX Spark</span>
+    </div>
+
+    <div class="pipeline">
+        <span class="pipeline-step">Why Local</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Cost Model</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Ecosystem</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Hardware</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Picker</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">Roadmap</span>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════ SLIDE 00 ═══════════════════════════════ -->
+<section class="slide" id="slide-00">
+    <div class="slide-number">00</div>
+    <h2>Topics We'll Cover</h2>
+    <p>This first deck sets the scene. Before picking a framework or buying a GPU, it's worth being deliberate about <em>why</em> you're hosting an LLM locally and what you're trading off against the managed APIs.</p>
+    <ul class="contents-list">
+        <li><a href="#slide-01">Four Drivers of Local Hosting</a></li>
+        <li><a href="#slide-02">The Total Cost Model</a></li>
+        <li><a href="#slide-03">The Framework Landscape</a></li>
+        <li><a href="#slide-04">Serving vs Single-User Stacks</a></li>
+        <li><a href="#slide-05">Hardware Tiers at a Glance</a></li>
+        <li><a href="#slide-06">Model Sizes, Formats, and Fit</a></li>
+        <li><a href="#slide-07">Interactive: What Should I Run?</a></li>
+        <li><a href="#slide-08">Rest of the Series</a></li>
+    </ul>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 01 ═══════════════════════════════ -->
+<section class="slide" id="slide-01">
+    <div class="slide-number">01</div>
+    <h2>Four Drivers of Local Hosting</h2>
+    <p>People run LLMs on their own hardware for one of four reasons — often more than one, but almost always at least one. Being honest about which one is driving you keeps the stack simple.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>1 &middot; Data Residency &amp; Privacy</h4>
+            <p>Regulated data (patient records, legal discovery, on-prem code) cannot leave the network. The frontier-model APIs retain logs; an air-gapped local deployment side-steps that entirely. This is the single most common reason enterprises stand up vLLM or TensorRT-LLM internally.</p>
+        </div>
+        <div class="diagram-panel accent-border">
+            <h4>2 &middot; Cost at Scale</h4>
+            <p>The API break-even is somewhere around 2&ndash;5 million tokens/day for a 7&ndash;14B model. Below that, APIs win; above it, depreciating a £1,500 GPU over two years is cheaper per token. Batching is what makes the local side work.</p>
+        </div>
+        <div class="diagram-panel accent-border">
+            <h4>3 &middot; Latency &amp; Determinism</h4>
+            <p>A local model on an RTX 4090 can serve a short prompt in ~40 ms TTFT vs ~300&ndash;600 ms round-trip to a hosted API. For voice agents, IDE autocomplete, and sub-second user-facing loops this matters. No rate limits, no retry storms.</p>
+        </div>
+        <div class="diagram-panel accent-border">
+            <h4>4 &middot; Customisation</h4>
+            <p>LoRA fine-tunes, quantised experts, speculative-decoding draft models, domain-specific tokenisers, and odd context-window configurations are all trivial locally and mostly impossible on closed APIs.</p>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Honest Caveat</div>
+        <p>Local inference is <strong>not</strong> a free-tier optimisation. If "I want to save money on my weekend chatbot" is the only driver, you will almost certainly spend more in electricity and time than the £20/month you saved. Drivers 1 and 3 justify the effort far more cleanly than driver 2 alone.</p>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 02 ═══════════════════════════════ -->
+<section class="slide" id="slide-02">
+    <div class="slide-number">02</div>
+    <h2>The Total Cost Model</h2>
+    <p>The honest comparison is cost per million tokens, amortised over the life of the hardware. Every factor below matters.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Cost Component</th><th>Typical Range (home / SMB)</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>GPU (CapEx)</td><td>£250&ndash;£4,000</td><td>RTX 3060 &rarr; DGX Spark</td></tr>
+                <tr><td>Host (CPU / RAM / PSU)</td><td>£400&ndash;£1,200</td><td>Needs 2&times; GPU TDP headroom in the PSU</td></tr>
+                <tr><td>Electricity @ £0.25/kWh</td><td>~£0.10&ndash;£0.25 per hour under load</td><td>4090 pulls 450 W, Spark ~240 W</td></tr>
+                <tr><td>Admin time</td><td>Highly variable</td><td>Usually the dominant hidden cost</td></tr>
+                <tr><td>Model / weights</td><td>£0 (most open weights) or licence fees</td><td>Llama 3.x: permissive, Mistral: Apache 2.0, DeepSeek: MIT</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Where the API Break-Even Actually Sits</h3>
+    <p>Running a 13B model on a single RTX 4090 at 100 tok/s continuous, assuming £0.25/kWh and a 2-year hardware amortisation:</p>
+    <div class="diagram-vertical">
+        <div class="diagram-box">Hardware: £1,500 / (2 yr &times; 8,760 h) = £0.086/hr</div>
+        <div class="diagram-arrow">+</div>
+        <div class="diagram-box">Power: 0.45 kW &times; £0.25 = £0.11/hr</div>
+        <div class="diagram-arrow">=</div>
+        <div class="diagram-box accent">~£0.20/hr to run continuously</div>
+        <div class="diagram-arrow">&darr;</div>
+        <div class="diagram-box accent">At 100 tok/s &rarr; 360 k tok/hr &rarr; ~£0.55 per million tokens</div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Take-away</div>
+        <p>At ~£0.55 / M tokens you beat every frontier API on <em>marginal</em> cost — but only if you actually saturate the GPU. A 4090 sitting idle 22 hours a day is about £1.95/hr per utilised hour. <strong>Utilisation is the local-inference KPI.</strong> This is why continuous batching and request routing (decks 03, 08) matter so much.</p>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 03 ═══════════════════════════════ -->
+<section class="slide" id="slide-03">
+    <div class="slide-number">03</div>
+    <h2>The Framework Landscape</h2>
+    <p>Seven stacks matter in 2026. Each solves a different shape of problem. Deck 05 does a full head-to-head; this is the map.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Framework</th><th>Language</th><th>Sweet Spot</th><th>Backend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Ollama</strong></td><td>Go wrapper</td><td>Single-user desktop, laptops, dev loops</td><td>llama.cpp + GGUF</td></tr>
+                <tr><td><strong>llama.cpp</strong></td><td>C++</td><td>CPU inference, Apple Silicon, embedded</td><td>own GGML/GGUF</td></tr>
+                <tr><td><strong>vLLM</strong></td><td>Python + CUDA</td><td>High-throughput OpenAI-compatible serving</td><td>PagedAttention, CUDA/ROCm</td></tr>
+                <tr><td><strong>TGI</strong> (HF)</td><td>Rust + Python</td><td>HuggingFace-integrated production</td><td>Flash-Attention, TP</td></tr>
+                <tr><td><strong>SGLang</strong></td><td>Python</td><td>Structured output, multi-turn, RadixAttention</td><td>Triton kernels</td></tr>
+                <tr><td><strong>TensorRT-LLM</strong></td><td>C++/Python</td><td>Max-performance NVIDIA-only</td><td>TensorRT engines</td></tr>
+                <tr><td><strong>LMDeploy / MLC</strong></td><td>Python / TVM</td><td>Mobile, Vulkan, exotic targets</td><td>AWQ, TVM</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>One-Axis Summary</h3>
+    <div class="tier-visual">
+        <div class="tier-bar">
+            <span class="tier-label">Ease</span>
+            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(118,185,0,0.5), rgba(118,185,0,0.1)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; TGI &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
+            <span class="tier-cost">&nbsp;</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">Throughput</span>
+            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(118,185,0,0.1), rgba(118,185,0,0.6)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; SGLang &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
+            <span class="tier-cost">&nbsp;</span>
+        </div>
+    </div>
+
+    <p>The best intuition: <strong>Ollama and llama.cpp are <em>inference clients</em></strong>. <strong>vLLM, TGI, SGLang, TensorRT-LLM are <em>inference servers</em></strong>. If more than one person is hitting the model, you want a server.</p>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 04 ═══════════════════════════════ -->
+<section class="slide" id="slide-04">
+    <div class="slide-number">04</div>
+    <h2>Serving vs Single-User Stacks</h2>
+    <p>The architectural gulf between a desktop chat UI and a production serving cluster is wide. Knowing which side you're on dictates everything downstream.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Single-user / desktop</h4>
+            <ul>
+                <li>One request at a time</li>
+                <li>KV cache per session, blown away on exit</li>
+                <li>GGUF quantised weights (usually 4-bit)</li>
+                <li>Optimised for <em>latency</em> not throughput</li>
+                <li>Ollama, llama.cpp, LM Studio, Jan</li>
+            </ul>
+        </div>
+        <div class="diagram-panel accent-border">
+            <h4>Multi-user / server</h4>
+            <ul>
+                <li>Continuous batching across many concurrent requests</li>
+                <li>PagedAttention / RadixAttention for KV re-use</li>
+                <li>FP16/BF16 or calibrated FP8/AWQ</li>
+                <li>Optimised for <em>throughput</em> — 5&ndash;20&times; higher tok/s</li>
+                <li>vLLM, TGI, SGLang, TensorRT-LLM</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>The Same Model, Two Wildly Different Numbers</h3>
+    <div class="canvas-wrap">
+        <svg viewBox="0 0 720 220" width="720" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Throughput comparison">
+            <style>
+                .axis { stroke: #21262d; stroke-width: 1; }
+                .lbl  { fill: #8b949e; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+                .val  { fill: #76B900; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
+                .bar1 { fill: #21262d; stroke: #30363d; }
+                .bar2 { fill: rgba(118,185,0,0.25); stroke: #76B900; }
+                .head { fill: #e6edf3; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; }
+            </style>
+            <text x="10" y="18" class="head">Llama-3.1-8B on RTX 4090 &mdash; tokens/second (aggregate)</text>
+            <line x1="110" y1="40" x2="110" y2="200" class="axis"/>
+            <line x1="110" y1="200" x2="700" y2="200" class="axis"/>
+
+            <text x="100" y="70" class="lbl" text-anchor="end">Ollama (1 user)</text>
+            <rect x="110" y="55" width="130" height="24" class="bar1"/>
+            <text x="245" y="72" class="val">~95 tok/s</text>
+
+            <text x="100" y="110" class="lbl" text-anchor="end">vLLM (1 user)</text>
+            <rect x="110" y="95" width="150" height="24" class="bar2"/>
+            <text x="265" y="112" class="val">~110 tok/s</text>
+
+            <text x="100" y="150" class="lbl" text-anchor="end">vLLM (8 users)</text>
+            <rect x="110" y="135" width="430" height="24" class="bar2"/>
+            <text x="545" y="152" class="val">~720 tok/s aggregate</text>
+
+            <text x="100" y="190" class="lbl" text-anchor="end">vLLM (32 users)</text>
+            <rect x="110" y="175" width="560" height="24" class="bar2"/>
+            <text x="560" y="190" class="val">~1450 tok/s</text>
+        </svg>
+    </div>
+    <p style="font-size: 0.85rem;">Indicative numbers, prompt ~256 tok, output ~128 tok, FP16. vLLM's aggregate throughput scales with concurrency up to KV-cache saturation; Ollama's does not. This chart is the whole reason decks 03, 04 and 08 exist.</p>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 05 ═══════════════════════════════ -->
+<section class="slide" id="slide-05">
+    <div class="slide-number">05</div>
+    <h2>Hardware Tiers at a Glance</h2>
+    <p>Local hosting spans from a £50 Raspberry-Pi-class CPU to a two-Spark cluster. Deck 07 goes into DGX Spark in depth; this is the shape of the space.</p>
+
+    <div class="tier-visual">
+        <div class="tier-bar">
+            <span class="tier-label">Laptop CPU</span>
+            <div class="tier-fill" style="width: 12%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent);">llama.cpp 3B q4</div>
+            <span class="tier-cost">free</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">Apple Silicon</span>
+            <div class="tier-fill" style="width: 30%; background: rgba(118,185,0,0.2); border: 1px solid var(--accent); color: var(--accent);">M2/M3/M4 — MLX, Ollama</div>
+            <span class="tier-cost">£1.5k+</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">RTX 3060 12 GB</span>
+            <div class="tier-fill" style="width: 42%; background: rgba(118,185,0,0.25); border: 1px solid var(--accent); color: var(--accent);">7B FP16 / 13B q4</div>
+            <span class="tier-cost">~£250</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">RTX 4090 24 GB</span>
+            <div class="tier-fill" style="width: 60%; background: rgba(118,185,0,0.35); border: 1px solid var(--accent); color: var(--accent);">13B FP16 / 70B q4</div>
+            <span class="tier-cost">~£1,500</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">DGX Spark 128 GB</span>
+            <div class="tier-fill" style="width: 80%; background: rgba(118,185,0,0.45); border: 1px solid var(--accent); color: #e6edf3;">70B FP8 / 200B quant</div>
+            <span class="tier-cost">~£3,800</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">2&times; Spark</span>
+            <div class="tier-fill" style="width: 92%; background: rgba(118,185,0,0.55); border: 1px solid var(--accent); color: #e6edf3;">200B FP8 / 400B quant</div>
+            <span class="tier-cost">~£7,600</span>
+        </div>
+        <div class="tier-bar">
+            <span class="tier-label">H100 cloud</span>
+            <div class="tier-fill" style="width: 100%; background: var(--accent); color: #0a0a0a; font-weight: 600;">any weight, any precision</div>
+            <span class="tier-cost">£2&ndash;6/hr</span>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 06 ═══════════════════════════════ -->
+<section class="slide" id="slide-06">
+    <div class="slide-number">06</div>
+    <h2>Model Sizes, Formats, and Fit</h2>
+    <p>The fundamental VRAM relationship worth memorising — every other decision falls out of this.</p>
+
+    <div class="callout">
+        <div class="callout-label">Rule of thumb</div>
+        <p><code>VRAM &asymp; params &times; bytes_per_param + KV_cache(batch, ctx)</code><br>
+        &mdash; FP16 &rarr; 2 B/param, FP8 &rarr; 1 B, INT4 (AWQ/GGUF q4) &rarr; 0.5 B.<br>
+        &mdash; KV cache per token &asymp; <code>2 &times; layers &times; hidden &times; bytes</code>. For Llama-3 8B in FP16: ~0.5 MB per token per sequence.</p>
+    </div>
+
+    <h3>Worked Examples</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Model</th><th>FP16 weights</th><th>INT4 weights</th><th>KV @ 4k ctx &middot; 1 seq</th><th>Fits on…</th></tr></thead>
+            <tbody>
+                <tr><td>Llama-3.2-3B</td><td>6 GB</td><td>1.8 GB</td><td>~0.25 GB</td><td>Any 8 GB GPU, CPU, Pi 5</td></tr>
+                <tr><td>Llama-3.1-8B</td><td>16 GB</td><td>4.5 GB</td><td>~0.5 GB</td><td>12 GB GPU (q4) / 24 GB GPU (FP16)</td></tr>
+                <tr><td>Mistral-Small-24B</td><td>48 GB</td><td>13 GB</td><td>~1.5 GB</td><td>24 GB GPU (q4) / 48 GB GPU (FP16)</td></tr>
+                <tr><td>Llama-3.3-70B</td><td>140 GB</td><td>40 GB</td><td>~2.5 GB</td><td>48 GB (q4) / Spark (FP8) / H100</td></tr>
+                <tr><td>DeepSeek-V3 (MoE 236B)</td><td>470 GB</td><td>130 GB</td><td>~4 GB active</td><td>2&times; Spark (q4) or H100 cluster</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p style="font-size: 0.85rem;">Deck 06 goes into quantisation formats and perplexity tradeoffs; deck 07 goes into DGX Spark unified memory specifically.</p>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 07 — INTERACTIVE ═══════════════════════════════ -->
+<section class="slide" id="slide-07">
+    <div class="slide-number">07</div>
+    <h2>Interactive: What Should I Run?</h2>
+    <p>Pick your driver, concurrency, and hardware. The picker below applies the logic from slides 01&ndash;06.</p>
+
+    <div class="control-panel">
+        <div class="control-row">
+            <label for="driver">Primary driver</label>
+            <select id="driver">
+                <option value="privacy">Privacy / data residency</option>
+                <option value="cost">Cost at scale</option>
+                <option value="latency">Latency &amp; determinism</option>
+                <option value="customise">Customisation / fine-tune</option>
+                <option value="hobby">Hobby / learn</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="users">Concurrent users</label>
+            <input type="range" id="users" min="1" max="64" value="1">
+            <span class="val" id="users-val">1</span>
+        </div>
+        <div class="control-row">
+            <label for="hw">Available hardware</label>
+            <select id="hw">
+                <option value="cpu">Laptop CPU / 16 GB RAM</option>
+                <option value="mac">Apple Silicon (M2/M3/M4)</option>
+                <option value="3060">RTX 3060 12 GB</option>
+                <option value="4090">RTX 4090 24 GB</option>
+                <option value="spark">DGX Spark 128 GB</option>
+                <option value="2spark">2&times; DGX Spark</option>
+                <option value="cloud">Cloud H100 80 GB</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="ctx">Context length (k tokens)</label>
+            <input type="range" id="ctx" min="2" max="128" step="2" value="8">
+            <span class="val" id="ctx-val">8k</span>
+        </div>
+        <div id="picker-result" class="result-box"></div>
+    </div>
+
+    <script>
+    (function(){
+        const hw = {
+            cpu:    { vram: 0,   name: "Laptop CPU",          maxSingle: 3,  maxBatch: 1 },
+            mac:    { vram: 24,  name: "Apple Silicon",       maxSingle: 13, maxBatch: 3 },
+            '3060': { vram: 12,  name: "RTX 3060 12 GB",      maxSingle: 13, maxBatch: 4 },
+            '4090': { vram: 24,  name: "RTX 4090 24 GB",      maxSingle: 24, maxBatch: 16 },
+            spark:  { vram: 128, name: "DGX Spark",           maxSingle: 70, maxBatch: 32 },
+            '2spark':{ vram: 256,name: "2× DGX Spark",   maxSingle: 200,maxBatch: 48 },
+            cloud:  { vram: 80,  name: "H100 80 GB",          maxSingle: 70, maxBatch: 64 }
+        };
+
+        function recommend(){
+            const drv = document.getElementById('driver').value;
+            const users = +document.getElementById('users').value;
+            const hwKey = document.getElementById('hw').value;
+            const ctx = +document.getElementById('ctx').value;
+            const h = hw[hwKey];
+
+            let stack, model, quant, notes = [];
+            if (users > 1 && hwKey !== 'cpu') {
+                stack = users >= 16 ? "vLLM (TP if >1 GPU) or TensorRT-LLM" : "vLLM";
+                notes.push("Multi-user &rarr; you need continuous batching.");
+            } else if (hwKey === 'cpu' || hwKey === 'mac') {
+                stack = "Ollama (llama.cpp backend)";
+                notes.push("Single user on CPU/Apple &rarr; GGUF with llama.cpp wins.");
+            } else {
+                stack = users === 1 ? "Ollama for dev, vLLM for serving" : "vLLM";
+            }
+
+            if (h.maxSingle >= 70)       model = "Llama-3.3-70B";
+            else if (h.maxSingle >= 24)  model = "Mistral-Small-24B";
+            else if (h.maxSingle >= 13)  model = "Llama-3.1-8B or Qwen 14B";
+            else if (h.maxSingle >= 8)   model = "Llama-3.1-8B";
+            else                          model = "Llama-3.2-3B";
+
+            quant = (h.vram >= 48 && users <= h.maxBatch/2) ? "FP16 / BF16"
+                 : (h.vram >= 24)                           ? "FP8 or AWQ-INT4"
+                 : "GGUF q4_K_M";
+
+            if (ctx >= 32) notes.push("Long context &gt;32k &rarr; enable prefix caching (deck 08).");
+            if (drv === 'privacy') notes.push("Privacy: disable outbound telemetry, pin model digests, audit logs.");
+            if (drv === 'cost')    notes.push("Cost: target &ge; " + Math.round(h.maxBatch*0.6) + " concurrent reqs to amortise the GPU.");
+            if (drv === 'latency') notes.push("Latency: enable CUDA graphs (vLLM), prefix cache, speculative decoding.");
+            if (drv === 'customise') notes.push("Customisation: use vLLM --enable-lora for hot-swappable adapters.");
+            if (drv === 'hobby')   notes.push("Hobby: start with Ollama — deck 02 walks you through it.");
+
+            if (users > h.maxBatch) notes.push('<span class="badge warn">over-subscribed</span> ' + users + " users exceeds the ~" + h.maxBatch + "-concurrent budget for " + h.name + ". Expect queue depth to grow.");
+
+            document.getElementById('picker-result').innerHTML =
+                '<div><span class="line-label">hardware   &rarr;</span> <span class="line-val">' + h.name + '</span></div>' +
+                '<div><span class="line-label">framework  &rarr;</span> <span class="line-val">' + stack + '</span></div>' +
+                '<div><span class="line-label">model      &rarr;</span> <span class="line-val">' + model + '</span></div>' +
+                '<div><span class="line-label">precision  &rarr;</span> <span class="line-val">' + quant + '</span></div>' +
+                (notes.length ? '<div style="margin-top:0.5rem;color:var(--text-secondary);">' + notes.map(n => "• " + n).join("<br>") + '</div>' : '');
+        }
+        document.getElementById('users').addEventListener('input', e => { document.getElementById('users-val').textContent = e.target.value; recommend(); });
+        document.getElementById('ctx').addEventListener('input',   e => { document.getElementById('ctx-val').textContent   = e.target.value + 'k'; recommend(); });
+        ['driver','hw'].forEach(id => document.getElementById(id).addEventListener('change', recommend));
+        recommend();
+    })();
+    </script>
+</section>
+
+<!-- ═══════════════════════════════ SLIDE 08 ═══════════════════════════════ -->
+<section class="slide" id="slide-08">
+    <div class="slide-number">08</div>
+    <h2>Rest of the Series</h2>
+    <ul class="contents-list">
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_02_Ollama/">Ollama &mdash; Zero-Friction Local LLMs</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_03_vLLM_Architecture/">Inside vLLM &mdash; PagedAttention &amp; Continuous Batching</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_04_vLLM_Docker/">vLLM in Docker on NVIDIA GPUs</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_05_Multi_GPU_Parallelism/">Multi-GPU Parallelism &mdash; TP / PP / DP / EP, NCCL, NVLink, InfiniBand</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_06_Frameworks/">Framework Shootout &mdash; vLLM vs Ollama vs llama.cpp vs TGI vs SGLang vs TensorRT-LLM</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_07_Quantization/">Quantization &mdash; GGUF, AWQ, GPTQ, FP8, INT4, MX-FP4</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_08_DGX_Spark/">Deploying on NVIDIA DGX Spark</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_09_Determinism/">Sources of Non-Determinism in LLM Serving</a></li>
+        <li><a href="https://brendanjameslynskey.github.io/Local_LLM_10_Production/">Production Patterns &mdash; Routing, Caching, Observability, SLOs</a></li>
+    </ul>
+
+    <div class="callout">
+        <div class="callout-label">How to read the series</div>
+        <p>Decks 02 and 03 stand alone — pick the one matching your stack. Deck 04 is a pragmatic deployment guide; deck 05 is the companion on multi-GPU parallelism. Decks 06 and 07 are reference material (frameworks and quantisation). Deck 08 is the DGX-Spark-specific walkthrough. Decks 09 and 10 are the ones that matter once you're running something real — determinism and production patterns.</p>
+    </div>
+</section>
+<!-- ════════════════════════════════════ Footer ════════════════════════════════════ -->
+<footer class="footer">
+    <p>Part of the <a href="https://github.com/BrendanJamesLynskey/LLMs#local-llm-hosting">Local LLM Hosting Series</a></p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;"><a href="https://github.com/BrendanJamesLynskey/LLMs#local-llm-hosting">Back to Series Index</a></p>
+</footer>
+
+<script>
+    // Smooth scroll for TOC links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Subtle fade-in on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.slide').forEach(slide => {
+        slide.style.opacity = '0';
+        slide.style.transform = 'translateY(30px)';
+        slide.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(slide);
+    });
+</script>
+
+</body>
+</html>
