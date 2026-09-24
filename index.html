@@ -9,15 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-card: #0d1117;
-            --bg-code: #161b22;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --accent: #76B900;
-            --accent-dim: #76B90044;
-            --accent-glow: #76B90033;
-            --border: #21262d;
+            --bg-primary: #1c1815;
+            --bg-card: #231e1a;
+            --bg-code: #2b2520;
+            --text-primary: #efe8dc;
+            --text-secondary: #a2978b;
+            --accent: #aabd59;
+            --accent-dim: #aabd5944;
+            --accent-glow: #aabd5933;
+            --border: #3a322b;
             --font-display: 'Space Grotesk', sans-serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
             --font-body: 'Inter', sans-serif;
@@ -228,7 +228,7 @@
             font-family: var(--font-mono);
             font-size: 0.75rem;
             color: var(--accent);
-            background: rgba(118, 185, 0, 0.08);
+            background: rgba(170,189,89,0.08);
             padding: 0.4rem 1rem;
             border-bottom: 1px solid var(--border);
         }
@@ -243,18 +243,18 @@
             font-family: var(--font-mono);
             font-size: 0.85rem;
             line-height: 1.6;
-            color: #c9d1d9;
+            color: #dad1c5;
         }
 
         /* Syntax highlighting (manual) */
-        .kw { color: #ff7b72; }
-        .fn { color: #d2a8ff; }
-        .str { color: #a5d6ff; }
-        .cm { color: #8b949e; font-style: italic; }
-        .num { color: #79c0ff; }
-        .type { color: #ffa657; }
-        .dir { color: #ff7b72; }
-        .mac { color: #ffa657; }
+        .kw { color: #de805a; }
+        .fn { color: #d7bbdf; }
+        .str { color: #bcdbd4; }
+        .cm { color: #a2978b; font-style: italic; }
+        .num { color: #97cdc6; }
+        .type { color: #e3b174; }
+        .dir { color: #de805a; }
+        .mac { color: #e3b174; }
 
         /* ── Tables ── */
         .table-wrap {
@@ -292,7 +292,7 @@
         }
 
         tr:nth-child(even) td {
-            background: rgba(13, 17, 23, 0.5);
+            background: rgba(35,30,26,0.5);
         }
 
         /* ── Diagrams ── */
@@ -324,7 +324,7 @@
         .diagram-box.accent {
             border-color: var(--accent);
             color: var(--accent);
-            background: rgba(118, 185, 0, 0.08);
+            background: rgba(170,189,89,0.08);
         }
 
         .diagram-box.dim {
@@ -400,7 +400,7 @@
         .hierarchy-item.accent {
             border-color: var(--accent);
             color: var(--accent);
-            background: rgba(118, 185, 0, 0.08);
+            background: rgba(170,189,89,0.08);
         }
 
         /* Grid diagram */
@@ -673,7 +673,7 @@
             cursor: pointer;
             transition: background 0.15s ease;
         }
-        .btn:hover { background: rgba(118, 185, 0, 0.2); }
+        .btn:hover { background: rgba(170,189,89,0.2); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn.secondary {
             background: var(--bg-code);
@@ -750,8 +750,8 @@
             margin-left: 0.3rem;
         }
         .badge.ok    { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-        .badge.warn  { border-color: #ffa657; color: #ffa657; background: rgba(255,166,87,0.08); }
-        .badge.bad   { border-color: #ff7b72; color: #ff7b72; background: rgba(255,123,114,0.08); }
+        .badge.warn  { border-color: #e3b174; color: #e3b174; background: rgba(227,177,116,0.08); }
+        .badge.bad   { border-color: #de805a; color: #de805a; background: rgba(222,128,90,0.08); }
 
     </style>
 </head>
@@ -903,12 +903,12 @@
     <div class="tier-visual">
         <div class="tier-bar">
             <span class="tier-label">Ease</span>
-            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(118,185,0,0.5), rgba(118,185,0,0.1)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; TGI &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
+            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(170,189,89,0.5), rgba(170,189,89,0.1)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; TGI &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
             <span class="tier-cost">&nbsp;</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">Throughput</span>
-            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(118,185,0,0.1), rgba(118,185,0,0.6)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; SGLang &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
+            <div class="tier-fill" style="width: 100%; background: linear-gradient(90deg, rgba(170,189,89,0.1), rgba(170,189,89,0.6)); color: var(--text-primary);">Ollama &nbsp;&rarr;&nbsp; llama.cpp &nbsp;&rarr;&nbsp; vLLM &nbsp;&rarr;&nbsp; SGLang &nbsp;&rarr;&nbsp; TensorRT-LLM</div>
             <span class="tier-cost">&nbsp;</span>
         </div>
     </div>
@@ -949,12 +949,12 @@
     <div class="canvas-wrap">
         <svg viewBox="0 0 720 220" width="720" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Throughput comparison">
             <style>
-                .axis { stroke: #21262d; stroke-width: 1; }
-                .lbl  { fill: #8b949e; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-                .val  { fill: #76B900; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
-                .bar1 { fill: #21262d; stroke: #30363d; }
-                .bar2 { fill: rgba(118,185,0,0.25); stroke: #76B900; }
-                .head { fill: #e6edf3; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; }
+                .axis { stroke: #3a322b; stroke-width: 1; }
+                .lbl  { fill: #a2978b; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+                .val  { fill: #aabd59; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
+                .bar1 { fill: #3a322b; stroke: #463e36; }
+                .bar2 { fill: rgba(170,189,89,0.25); stroke: #aabd59; }
+                .head { fill: #efe8dc; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; }
             </style>
             <text x="10" y="18" class="head">Llama-3.1-8B on RTX 4090 &mdash; tokens/second (aggregate)</text>
             <line x1="110" y1="40" x2="110" y2="200" class="axis"/>
@@ -994,32 +994,32 @@
         </div>
         <div class="tier-bar">
             <span class="tier-label">Apple Silicon</span>
-            <div class="tier-fill" style="width: 30%; background: rgba(118,185,0,0.2); border: 1px solid var(--accent); color: var(--accent);">M2/M3/M4 — MLX, Ollama</div>
+            <div class="tier-fill" style="width: 30%; background: rgba(170,189,89,0.2); border: 1px solid var(--accent); color: var(--accent);">M2/M3/M4 — MLX, Ollama</div>
             <span class="tier-cost">£1.5k+</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">RTX 3060 12 GB</span>
-            <div class="tier-fill" style="width: 42%; background: rgba(118,185,0,0.25); border: 1px solid var(--accent); color: var(--accent);">7B FP16 / 13B q4</div>
+            <div class="tier-fill" style="width: 42%; background: rgba(170,189,89,0.25); border: 1px solid var(--accent); color: var(--accent);">7B FP16 / 13B q4</div>
             <span class="tier-cost">~£250</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">RTX 4090 24 GB</span>
-            <div class="tier-fill" style="width: 60%; background: rgba(118,185,0,0.35); border: 1px solid var(--accent); color: var(--accent);">13B FP16 / 70B q4</div>
+            <div class="tier-fill" style="width: 60%; background: rgba(170,189,89,0.35); border: 1px solid var(--accent); color: var(--accent);">13B FP16 / 70B q4</div>
             <span class="tier-cost">~£1,500</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">DGX Spark 128 GB</span>
-            <div class="tier-fill" style="width: 80%; background: rgba(118,185,0,0.45); border: 1px solid var(--accent); color: #e6edf3;">70B FP8 / 200B quant</div>
+            <div class="tier-fill" style="width: 80%; background: rgba(170,189,89,0.45); border: 1px solid var(--accent); color: #efe8dc;">70B FP8 / 200B quant</div>
             <span class="tier-cost">~£3,800</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">2&times; Spark</span>
-            <div class="tier-fill" style="width: 92%; background: rgba(118,185,0,0.55); border: 1px solid var(--accent); color: #e6edf3;">200B FP8 / 400B quant</div>
+            <div class="tier-fill" style="width: 92%; background: rgba(170,189,89,0.55); border: 1px solid var(--accent); color: #efe8dc;">200B FP8 / 400B quant</div>
             <span class="tier-cost">~£7,600</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">H100 cloud</span>
-            <div class="tier-fill" style="width: 100%; background: var(--accent); color: #0a0a0a; font-weight: 600;">any weight, any precision</div>
+            <div class="tier-fill" style="width: 100%; background: var(--accent); color: #1c1815; font-weight: 600;">any weight, any precision</div>
             <span class="tier-cost">£2&ndash;6/hr</span>
         </div>
     </div>
