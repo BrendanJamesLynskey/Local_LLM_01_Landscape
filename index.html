@@ -999,12 +999,12 @@
         </div>
         <div class="tier-bar">
             <span class="tier-label">RTX 3060 12 GB</span>
-            <div class="tier-fill" style="width: 42%; background: rgba(170,189,89,0.25); border: 1px solid var(--accent); color: var(--accent);">7B FP16 / 13B q4</div>
+            <div class="tier-fill" style="width: 42%; background: rgba(170,189,89,0.25); border: 1px solid var(--accent); color: var(--accent);">7B q8 / 13B q4</div>
             <span class="tier-cost">~£250</span>
         </div>
         <div class="tier-bar">
             <span class="tier-label">RTX 4090 24 GB</span>
-            <div class="tier-fill" style="width: 60%; background: rgba(170,189,89,0.35); border: 1px solid var(--accent); color: var(--accent);">13B FP16 / 70B q4</div>
+            <div class="tier-fill" style="width: 60%; background: rgba(170,189,89,0.35); border: 1px solid var(--accent); color: var(--accent);">8B FP16 / 32B q4</div>
             <span class="tier-cost">~£1,500</span>
         </div>
         <div class="tier-bar">
@@ -1035,7 +1035,7 @@
         <div class="callout-label">Rule of thumb</div>
         <p><code>VRAM &asymp; params &times; bytes_per_param + KV_cache(batch, ctx)</code><br>
         &mdash; FP16 &rarr; 2 B/param, FP8 &rarr; 1 B, INT4 (AWQ/GGUF q4) &rarr; 0.5 B.<br>
-        &mdash; KV cache per token &asymp; <code>2 &times; layers &times; hidden &times; bytes</code>. For Llama-3 8B in FP16: ~0.5 MB per token per sequence.</p>
+        &mdash; KV cache per token &asymp; <code>2 &times; layers &times; kv_heads &times; head_dim &times; bytes</code>. For Llama-3 8B in FP16 (GQA, 8 KV heads &times; 128): ~0.13 MB per token per sequence.</p>
     </div>
 
     <h3>Worked Examples</h3>
@@ -1043,11 +1043,11 @@
         <table>
             <thead><tr><th>Model</th><th>FP16 weights</th><th>INT4 weights</th><th>KV @ 4k ctx &middot; 1 seq</th><th>Fits on…</th></tr></thead>
             <tbody>
-                <tr><td>Llama-3.2-3B</td><td>6 GB</td><td>1.8 GB</td><td>~0.25 GB</td><td>Any 8 GB GPU, CPU, Pi 5</td></tr>
+                <tr><td>Llama-3.2-3B</td><td>6 GB</td><td>1.8 GB</td><td>~0.45 GB</td><td>Any 8 GB GPU, CPU, Pi 5</td></tr>
                 <tr><td>Llama-3.1-8B</td><td>16 GB</td><td>4.5 GB</td><td>~0.5 GB</td><td>12 GB GPU (q4) / 24 GB GPU (FP16)</td></tr>
-                <tr><td>Mistral-Small-24B</td><td>48 GB</td><td>13 GB</td><td>~1.5 GB</td><td>24 GB GPU (q4) / 48 GB GPU (FP16)</td></tr>
-                <tr><td>Llama-3.3-70B</td><td>140 GB</td><td>40 GB</td><td>~2.5 GB</td><td>48 GB (q4) / Spark (FP8) / H100</td></tr>
-                <tr><td>DeepSeek-V3 (MoE 236B)</td><td>470 GB</td><td>130 GB</td><td>~4 GB active</td><td>2&times; Spark (q4) or H100 cluster</td></tr>
+                <tr><td>Mistral-Small-24B</td><td>48 GB</td><td>13 GB</td><td>~0.65 GB</td><td>24 GB GPU (q4) / 48 GB GPU (FP16)</td></tr>
+                <tr><td>Llama-3.3-70B</td><td>140 GB</td><td>40 GB</td><td>~1.3 GB</td><td>48 GB (q4) / Spark (FP8) / H100</td></tr>
+                <tr><td>DeepSeek-V3 (MoE 671B)</td><td>1,342 GB</td><td>~335 GB</td><td>~0.3 GB (MLA)</td><td>Multi-GPU H100/H200 node (too big for 2&times; Spark)</td></tr>
             </tbody>
         </table>
     </div>
